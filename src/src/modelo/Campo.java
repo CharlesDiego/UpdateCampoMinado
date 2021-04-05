@@ -1,9 +1,9 @@
-package modelo;
+package src.modelo;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import excecao.ExplosaoException;
+import src.excecao.ExplosaoException;
 
 public class Campo {
 	
