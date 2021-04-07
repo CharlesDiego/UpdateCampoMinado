@@ -15,7 +15,7 @@ public class Campo {
 	private final int coluna;
 	
 	private List<Campo> vizinhos = new ArrayList<>();
-	private List<Consumer<Boolean>> observadores = new ArrayList<>();
+	private List<CampoObservador> observadores = new ArrayList<>();
 	
 	
 	public Campo(int linha, int coluna) {
@@ -24,16 +24,13 @@ public class Campo {
 		this.coluna = coluna;
 	}
 		
-	public void registrarObjservador (Consumer<Boolean> observador) {
-		observadores.add( observador);
-	};
+
+	
 	public void registrarObservador (CampoObservador observador) {
 		observadores.add(observador);
 	}
-	private void notificarObservadores(Boolean evento) {
-		observadores.stream()
-		.forEach(o -> o.eventoOcorreu(this, evento));
-	}
+	
+
 	private void notificarObservadores(CampoEvento evento) {
 		observadores.stream()
 		.forEach(o -> o.eventoOcorreu(this, evento));
@@ -104,7 +101,9 @@ public class Campo {
 	}
 	void setAberto(boolean aberto) {
 		this.aberto = aberto;
+		if(aberto) {
 		notificarObservadores(CampoEvento.ABRIR);
+		}
 	}
 	
 	public boolean isAberto () {
