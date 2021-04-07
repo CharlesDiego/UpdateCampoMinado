@@ -2,8 +2,8 @@ package src.modelo;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import src.excecao.ExplosaoException;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class Campo {
 	
@@ -15,13 +15,31 @@ public class Campo {
 	private final int coluna;
 	
 	private List<Campo> vizinhos = new ArrayList<>();
+	private List<Consumer<Boolean>> observadores = new ArrayList<>();
 	
 	
-	  public Campo(int linha, int coluna) {
+	public Campo(int linha, int coluna) {
 		super();
 		this.linha = linha;
 		this.coluna = coluna;
 	}
+		
+	public void registrarObjservador (Consumer<Boolean> observador) {
+		observadores.add( observador);
+	};
+	public void registrarObservador (CampoObservador observador) {
+		observadores.add(observador);
+	}
+	private void notificarObservadores(Boolean evento) {
+		observadores.stream()
+		.forEach(o -> o.eventoOcorreu(this, evento));
+	}
+	private void notificarObservadores(CampoEvento evento) {
+		observadores.stream()
+		.forEach(o -> o.eventoOcorreu(this, evento));
+		
+	}
+	
 		
 	public boolean adicionarVizinho(Campo vizinho) {
 		boolean linhaDiferente = linha != vizinho.linha;
@@ -46,17 +64,26 @@ public class Campo {
 	  void alternarMarcacao() {
 		if (!aberto) {
 			marcado = !marcado;
+			if(marcado) {
+				notificarObservadores(CampoEvento.MARCAR);
+			}else {
+				notificarObservadores(CampoEvento.DESMARCAR);
+			}
 		}
 	}
 	public boolean abrir() {
 		if (!aberto && !marcado) {
-			aberto = true;
+			
 			if(minado ) {
-				throw new ExplosaoException();
+				notificarObservadores(CampoEvento.EXPLODIR);
+				return true;
 			}
+			setAberto(true);
+			
 			if(vizinhaSegura()) {
 				vizinhos.forEach(v -> v.abrir());
 			}
+			
 			return true;
 		} else {
 		return false;
@@ -77,6 +104,7 @@ public class Campo {
 	}
 	void setAberto(boolean aberto) {
 		this.aberto = aberto;
+		notificarObservadores(CampoEvento.ABRIR);
 	}
 	
 	public boolean isAberto () {
@@ -103,19 +131,5 @@ public class Campo {
 		aberto = false;
 		minado = false;
 		marcado = false;
-	}
-	public String toString() {
-		if (marcado) {
-			return "x";
-			
-		}else if (aberto && minado) {
-			return "*";
-		}else if (aberto && minasNaVizinhanca()>0) {
-			return Long.toString(minasNaVizinhanca());
-		}else if (aberto) {
-			return " ";
-		} else { 
-			return "?";
-		}
 	}
 }
