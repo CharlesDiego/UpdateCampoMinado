@@ -30,6 +30,20 @@ public class Tabuleiro implements CampoObservador{
 		sortearMinas();
 		
 	}
+	
+	public int getLinhas() {
+		return linhas;
+	}
+
+	public int getColunas() {
+		return colunas;
+	}
+	
+	public void paraCadaCampo(Consumer<Campo> funcao) {
+		campos.forEach(funcao);
+		
+	}
+
 	public void registrarObservador (Consumer<ResultadoEvento> observador) {
 		observadores.add(observador);
 	}	
@@ -112,6 +126,7 @@ public class Tabuleiro implements CampoObservador{
 	private void mostrarMinas() {
 		campos.stream()
 		.filter(c-> c.isMinado())
+		.filter(c-> !c.isMarcado())
 		.forEach(c -> c.setAberto(true));
 		
 	}
